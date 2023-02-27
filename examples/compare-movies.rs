@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, process};
 use std::env;
 
 use api_demo::tmdb::{Person, Tmdb};
@@ -12,6 +12,12 @@ async fn main() {
     let tmdb = Tmdb::create(&tmdb_api_key);
 
     let args:Vec<String> = env::args().collect();
+
+    if args.len() != 3 {
+        eprintln!("\ncompare-movies requires two parameters.\n\tUsage: compare-movies <id-one> <id-two>");
+        process::exit(1);
+    }
+
     let id_a = String::from(&args[1]);
     let id_b = String::from(&args[2]);
 
