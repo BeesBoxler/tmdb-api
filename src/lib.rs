@@ -1,7 +1,7 @@
 mod config;
 mod url;
-pub mod people;
 pub mod movies;
+pub mod people;
 
 pub use movies::Movie;
 pub use people::Person;
@@ -9,7 +9,7 @@ pub use people::Person;
 use self::movies::Movies;
 
 pub struct Tmdb {
-    pub movies: Movies
+    pub movies: Movies,
 }
 
 impl Tmdb {
