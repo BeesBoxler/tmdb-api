@@ -1,7 +1,8 @@
-use std::{collections::HashSet, process};
 use std::env;
+use std::process;
 
-use api_demo::tmdb::{Person, Tmdb};
+use api_demo::tmdb::movies::credits::CastMember;
+use api_demo::tmdb::Tmdb;
 use dotenv;
 
 #[tokio::main(flavor = "current_thread")]
@@ -11,10 +12,12 @@ async fn main() {
         dotenv::var("TMDB_API_KEY").expect("Environment variable TMDB_API_KEY was not found");
     let tmdb = Tmdb::create(&tmdb_api_key);
 
-    let args:Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
 
     if args.len() != 3 {
-        eprintln!("\ncompare-movies requires two parameters.\n\tUsage: compare-movies <id-one> <id-two>");
+        eprintln!(
+            "\ncompare-movies requires two parameters.\n\n\tUsage: compare-movies <id-one> <id-two>"
+        );
         process::exit(1);
     }
 
@@ -22,38 +25,42 @@ async fn main() {
     let id_b = String::from(&args[2]);
 
     let movie_a = tmdb
-        .get_movie(&id_a)
+        .movies
+        .get_movie(id_a.parse().unwrap())
         .await
         .expect(&format!("Movie with ID {id_a} not found"));
     let movie_b = tmdb
-        .get_movie(&id_b)
+        .movies
+        .get_movie(id_b.parse().unwrap())
         .await
         .expect(&format!("Movie with ID {id_b} not found"));
 
-    let movie_a_cast: HashSet<Person> = tmdb
-        .get_credits(&id_a)
-        .await
-        .expect(&format!("Credits for movie {} not found.", movie_a.title))
-        .cast
-        .into_iter()
-        .collect();
-    let movie_b_cast: HashSet<Person> = tmdb
-        .get_credits(&id_b)
-        .await
-        .expect(&format!("Credits for movie {} not found.", movie_b.title))
-        .cast
-        .into_iter()
-        .collect();
+    let movie_a_cast = movie_a.get_credits(&tmdb).await.unwrap();
+    let movie_b_cast = movie_b.get_credits(&tmdb).await.unwrap();
 
-    let intersect:Vec<&Person> = movie_a_cast.intersection(&movie_b_cast).collect();
+    let mutual_cast = movie_a_cast
+        .cast
+        .iter()
+        .filter(|c| {
+            !!&movie_b_cast
+                .cast
+                .binary_search_by(|f| f.id.cmp(&c.id))
+                .is_ok()
+        })
+        .collect::<Vec<&CastMember>>();
 
     println!(
         "Two films selected are {} and {}",
         movie_a.title, movie_b.title
     );
-    if intersect.len() > 0 {
+
+    dbg!(tmdb.movies.get_images(550).await.ok());
+
+    if mutual_cast.len() > 0 {
         println!("Actors in both films:");
-        intersect.into_iter().for_each(|person| println!("{}", person.name));
+        mutual_cast
+            .into_iter()
+            .for_each(|person| println!("{}", person.name));
     } else {
         println!("There is no cast in common.");
     }

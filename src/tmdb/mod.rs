@@ -1,33 +1,21 @@
 mod config;
-mod movie;
-mod person;
+mod url;
+pub mod people;
+pub mod movies;
 
-use reqwest::{self, Response, Result};
-pub use movie::{Credits, Movie};
-pub use person::Person;
+pub use movies::Movie;
+pub use people::Person;
+
+use self::movies::Movies;
 
 pub struct Tmdb {
-    api_key: String,
+    pub movies: Movies
 }
 
 impl Tmdb {
     pub fn create(api_key: &str) -> Self {
-        Tmdb {api_key: String::from(api_key)}
-    }
-
-    pub async fn get_movie(&self, id: &str) -> Result<Movie> {
-        self.get(format!("/movie/{id}")).await?.json::<Movie>().await
-    }
-
-    pub async fn get_credits(&self, id: &str) -> Result<Credits> {
-        self.get(format!("/movie/{id}/credits")).await?.json::<Credits>().await
-    }
-
-    async fn get(&self, path: String) -> Result<Response> {
-        let config::Config { endpoint, version } = config::CONFIG;
-        let api_key = &*self.api_key;
-        let url = format!("{endpoint}{version}{path}?api_key={api_key}");
-
-        reqwest::get(url).await
+        Tmdb {
+            movies: Movies::create(api_key),
+        }
     }
 }
