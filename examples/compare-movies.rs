@@ -1,8 +1,8 @@
 use std::env;
 use std::process;
 
-use api_demo::tmdb::movies::credits::CastMember;
-use api_demo::tmdb::Tmdb;
+use tmdb::movies::credits::CastMember;
+use tmdb::Tmdb;
 use dotenv;
 
 #[tokio::main(flavor = "current_thread")]

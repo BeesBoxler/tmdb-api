@@ -1,6 +1,6 @@
 use reqwest::Result;
 use serde::Deserialize;
-use crate::tmdb::Tmdb;
+use crate::Tmdb;
 
 use super::{status::Status, Credits};
 
