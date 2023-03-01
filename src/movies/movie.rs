@@ -20,7 +20,7 @@ pub struct Movie {
     pub overview: Option<String>,
     pub popularity: f64,
     pub poster_path: Option<String>,
-    pub production_companies: Vec<ProductionCompany>,
+    pub production_companies: Vec<ProductionCompanyResult>,
     pub production_countries: Vec<ProductionCountry>,
     pub release_date: String,
     pub revenue: usize,
@@ -40,7 +40,7 @@ impl Movie {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct ProductionCompany {
+pub struct ProductionCompanyResult {
     pub name: String,
     pub id: usize,
     pub logo_path: Option<String>,
